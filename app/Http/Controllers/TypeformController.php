@@ -2,26 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\BKOMessage;
+use App\Services\SlackService;
 use Laravel\Lumen\Http\Request;
-use App\Models\TypeFormResponse;
+use App\Services\TypeFormService;
 
 class TypeformController extends Controller
 {
     public function webhook(Request $request)
     {
-        $typeform = new TypeFormResponse($request->json()->all());
-        
-        return [
-            "token" => $typeform->getToken(),
-            "submitedAt" => $typeform->getSubmitedAt(),
-            "nota" => $typeform->getNota(),
-            "motivo" => $typeform->getMotivo(),
-            "satisfacao" => $typeform->getSatisfacao(),
-            "temComentario" => $typeform->getTemComentario(),
-            "comentario" => $typeform->getComentario(),
-            "order" => $typeform->getOrder(),
-        ];
-    }
+        $typeForm = new TypeFormService($request->json()->all());
 
-  
+        if ($typeForm->hasCause("Não recebi o meu pedido")) {
+            $slack = new SlackService();
+            $message = new BKOMessage($typeForm);
+            $slack->postMessage($message->toString());
+        }
+    }
 }

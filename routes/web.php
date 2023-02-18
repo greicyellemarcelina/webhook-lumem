@@ -16,4 +16,3 @@ use Laravel\Lumen\Http\Request;
 */
 
 $router->post('/webhook', "TypeformController@webhook");
-
